@@ -10,7 +10,10 @@ sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
+//	maven { url "https://www.datanucleus.org/downloads/maven2/"}
 }
+
+
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'

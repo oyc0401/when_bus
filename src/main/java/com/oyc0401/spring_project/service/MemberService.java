@@ -2,7 +2,6 @@ package com.oyc0401.spring_project.service;
 
 import com.oyc0401.spring_project.domain.Member;
 import com.oyc0401.spring_project.repository.MemberRepository;
-import com.oyc0401.spring_project.repository.MemoryMemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

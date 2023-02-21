@@ -6,7 +6,6 @@ import com.oyc0401.spring_project.service.BusService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,25 +23,35 @@ public class BusController {
     }
 
 
-    @GetMapping("/bus")
-    public String list(Model model){
-        List<Bus> buses=busService.findBus();
-
-        model.addAttribute("buses",buses);
-        return "buses/busList";
-    }
-
-    @GetMapping("/bus/new")
-    public String createForm() {
-        return "buses/createBusForm";
-    }
-
-
-    @PostMapping("/bus/new")
+    @GetMapping("/all_bus")
     @ResponseBody
-    public String create() {
+    public List<Bus> getList() {
+        List<Bus> buses = busService.findBus();
+
+        return buses;
+    }
+
+
+    @PostMapping("/bus/api/start")
+    @ResponseBody
+    public String start() {
         busService.repeat();
-        return "추가했습니다.";
+        return "시작합니다.";
+    }
+
+    @PostMapping("/bus/api/stop")
+    @ResponseBody
+    public String stop() {
+        busService.stop();
+        return "정지했습니다.";
+    }
+
+
+    @GetMapping("/bus/api/working")
+    @ResponseBody
+    public boolean isWorking() {
+        boolean working = busService.working();
+        return working;
     }
 
 

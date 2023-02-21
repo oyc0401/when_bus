@@ -13,4 +13,6 @@ public interface SpringDataJpaBusRepository extends JpaRepository<Bus, Long>, Bu
     @Override
     Optional<Bus> findByBusId(int busId);
 
+    Optional<Bus> findFirstByOrderByIdDesc();
+
 }

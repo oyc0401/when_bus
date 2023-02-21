@@ -1,7 +1,5 @@
 package com.oyc0401.spring_project.repository;
 
-import com.oyc0401.spring_project.domain.Member;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

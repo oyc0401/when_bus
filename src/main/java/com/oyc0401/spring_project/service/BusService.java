@@ -25,6 +25,7 @@ public class BusService {
 
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
+    private boolean doing = false;
 
     @Autowired
     public BusService(BusRepository busRepository) {
@@ -39,22 +40,35 @@ public class BusService {
      */
     public Long join(Bus bus) {
 
-        validate(bus);
+        try {
+            validate(bus);
+            busRepository.save(bus);
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+        }
 
-        busRepository.save(bus);
+
         return bus.getId();
     }
 
-    public void repeat() {
+    public void stop() {
+        doing = false;
+    }
 
+    public boolean working() {
+        return doing;
+    }
+
+    public void repeat() {
+        doing = true;
 
         // 작업1 (스레드)
         executorService.submit(() -> {
             System.out.printf("작업 시작\n");
-            for (int i = 0; i <= 30; i++) {
+            while (doing) {
                 try {
                     joinApi();
-                    Thread.sleep(1000*90);
+                    Thread.sleep(1000 * 10);
 
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -79,7 +93,7 @@ public class BusService {
 
             JSONObject body = rjson.getJSONObject("msgBody");
 
-            System.out.printf(body.toString()+'\n');
+            System.out.printf(body.toString() + '\n');
 
             JSONArray array = body.getJSONArray("itemList");
 
@@ -93,7 +107,7 @@ public class BusService {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
                 String formattedNow = now.format(formatter);
 
-                if (!msg1.equals("출발대기")) {
+                if (!msg1.equals("출발대기") && !msg1.equals("운행종료")) {
                     Bus newBus = new Bus();
                     newBus.setTime(formattedNow);
                     newBus.setBusId(vehId);
@@ -111,14 +125,16 @@ public class BusService {
 
     }
 
-    private boolean validate(Bus bus) {
-        AtomicBoolean can= new AtomicBoolean(true);
-        busRepository.findByBusId(bus.getBusId())
-                .ifPresent(m -> {
-                    can.set(false);
-//                    throw new IllegalStateException("이미 존재하는 버스입니다.");
-                });
-        return can.get();
+    private void validate(Bus bus) {
+
+        Optional<Bus> b = busRepository.findFirstByOrderByIdDesc();
+        b.ifPresent(m -> {
+            if (m.getBusId() == bus.getBusId()) {
+                throw new IllegalStateException("최근에 추가한 버스입니다.");
+            }
+        });
+
+
     }
 
     public List<Bus> findBus() {

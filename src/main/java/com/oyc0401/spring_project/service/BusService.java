@@ -18,9 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static java.rmi.server.LogStream.log;
 
-@Service
 public class BusService {
 
     private final BusRepository busRepository;
@@ -48,10 +46,7 @@ public class BusService {
     }
 
     public void repeat() {
-//        if(!executorService.isTerminated()){
-//            executorService.shutdown();
-//
-//        }
+
 
         // 작업1 (스레드)
         executorService.submit(() -> {
@@ -59,7 +54,7 @@ public class BusService {
             for (int i = 0; i <= 30; i++) {
                 try {
                     joinApi();
-                    Thread.sleep(1000*60);
+                    Thread.sleep(1000*90);
 
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -73,16 +68,12 @@ public class BusService {
     public void joinApi() {
         // 부천 시청역
         String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=210000166&busRouteId=165000154&ord=16&resultType=json";
-
-
 //        String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=163000168&busRouteId=165000154&ord=2";
 
         try {
             URI uri = new URI(urlString);
 
             String response = WebClient.create().get().uri(uri).retrieve().bodyToMono(String.class).block();
-
-
             JSONObject rjson = new JSONObject(response);
 //        System.out.println(rjson.toString());
 

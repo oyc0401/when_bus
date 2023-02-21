@@ -1,8 +1,18 @@
 package com.oyc0401.spring_project.domain;
 
+import jakarta.persistence.*;
+
+
+@Entity
 public class Bus {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+
     private String time;
+
     private int busId;
 
     public Long getId() {

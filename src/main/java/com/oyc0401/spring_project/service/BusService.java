@@ -213,7 +213,7 @@ public class BusService {
  * aws 실행하는법
  */
 
-// cd /Users/oyuchan/when_bus_key
+// $ cd /Users/oyuchan/when_bus_key
 // $ ssh -i when-bus.pem ubuntu@3.36.184.88
 
 // $ cd spring_study

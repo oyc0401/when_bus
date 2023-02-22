@@ -227,6 +227,8 @@ public class BusService {
 
 // $ nohup java -jar ./build/libs/spring_project-0.0.1-SNAPSHOT.jar &
 
+// $ curl --location --request POST 'http://3.36.184.88:8080/api/start'
+
 // 현재 실행되는 jar
 // $ ps -ef | grep jar
 

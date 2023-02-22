@@ -1,12 +1,10 @@
 package com.oyc0401.spring_project.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oyc0401.spring_project.domain.Bus;
 import com.oyc0401.spring_project.repository.BusRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URI;
@@ -17,7 +15,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class BusService {
@@ -33,27 +30,14 @@ public class BusService {
         this.busRepository = busRepository;
     }
 
-    /**
-     * 회원가입
-     *
-     * @param bus
-     * @return Long
-     */
-    public Long join(Bus bus) {
-
-        try {
-            validate(bus);
-            busRepository.save(bus);
-            System.out.printf("새로운 버스가 출발했습니다!\n");
-        } catch (IllegalStateException e) {
-            System.out.println(e.getMessage());
-        }
-
-
-        return bus.getId();
+    public boolean isWorking() {
+        return doing;
     }
 
-    public void stop() {
+    public void stopRepeat() {
+        if(!doing){
+            return;
+        }
         doing = false;
 
         try {
@@ -66,14 +50,10 @@ public class BusService {
         }
     }
 
-    public boolean working() {
-
-        return doing;
-    }
-
-    public void repeat() {
+    public void startRepeat() {
         if (doing) {
-            throw new IllegalStateException("이미 작동중 입니다.");
+            return;
+//            throw new IllegalStateException("이미 작동중 입니다.");
         }
         doing = true;
 
@@ -87,7 +67,8 @@ public class BusService {
 
                     // 0시 ~ 3시면 작동 중지
                     if (!(hour <= 3)) {
-                        joinApi();
+                        JSONObject jsonObject = request1601();
+                        checkJoinBus(jsonObject);
                     }
 
 
@@ -109,47 +90,29 @@ public class BusService {
 
     }
 
-    public void joinApi() {
-        // 부천 시청역
-        String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=210000166&busRouteId=165000154&ord=16&resultType=json";
-//        String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=163000168&busRouteId=165000154&ord=2";
+
+    public List<Bus> getHistory(String date) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate now = LocalDate.parse(date, formatter);
+        LocalDateTime startDatetime = LocalDateTime.of(now, LocalTime.of(0, 0, 0));
+        LocalDateTime endDatetime = LocalDateTime.of(now, LocalTime.of(23, 59, 59));
+
+        return busRepository.findAllByDepartAtBetween(startDatetime, endDatetime);
+    }
+
+    private Long join(Bus bus) {
 
         try {
-            URI uri = new URI(urlString);
-            String response = WebClient.create().get().uri(uri).retrieve().bodyToMono(String.class).block();
-            JSONObject rjson = new JSONObject(response);
-//            System.out.printf(rjson.toString() + '\n');
-
-            JSONObject body = rjson.getJSONObject("msgBody");
-            JSONArray array = body.getJSONArray("itemList");
-
-            if (!array.isEmpty()) {
-                JSONObject object = array.getJSONObject(0);
-
-                final String msg1 = object.getString("arrmsg1");
-                final int vehId = object.getInt("vehId1");
-
-                final LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
-                System.out.printf("bus(message: " + msg1 + ", time: " + now.format(formatter) + ")\n");
-                if (!msg1.equals("출발대기") && !msg1.equals("운행종료")) {
-
-
-
-                    Bus newBus = new Bus();
-                    newBus.setBusId(vehId);
-                    newBus.setDepartAt(roundMinute10(now));
-                    newBus.setCreateAt(now);
-
-                    join(newBus);
-
-                }
-            }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            validate(bus);
+            busRepository.save(bus);
+            System.out.printf("새로운 버스가 출발했습니다!\n");
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
         }
 
 
+        return bus.getId();
     }
 
     private void validate(Bus bus) {
@@ -163,17 +126,49 @@ public class BusService {
 
     }
 
-    public void insertNow() {
-        Bus newBus = new Bus();
-        ZonedDateTime nowSeoul = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-        LocalDateTime now = nowSeoul.toLocalDateTime();
-        LocalDateTime depart = roundMinute10(now);
+    private JSONObject request1601() {
+        // 부천 시청역
+        String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=210000166&busRouteId=165000154&ord=16&resultType=json";
 
-        newBus.setBusId(1234);
-        newBus.setDepartAt(depart);
-        newBus.setCreateAt(now);
+        // 정석 항공고
+        // String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=163000168&busRouteId=165000154&ord=2";
 
-        busRepository.save(newBus);
+        try {
+            URI uri = new URI(urlString);
+            String response = WebClient.create().get().uri(uri).retrieve().bodyToMono(String.class).block();
+            return new JSONObject(response);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private void checkJoinBus(JSONObject rjson) {
+
+        JSONObject body = rjson.getJSONObject("msgBody");
+        JSONArray array = body.getJSONArray("itemList");
+
+        if (!array.isEmpty()) {
+            JSONObject object = array.getJSONObject(0);
+
+            final String msg1 = object.getString("arrmsg1");
+            final int vehId = object.getInt("vehId1");
+
+            final LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
+            System.out.printf("bus(message: " + msg1 + ", time: " + now.format(formatter) + ")\n");
+            if (!msg1.equals("출발대기") && !msg1.equals("운행종료")) {
+
+                Bus newBus = new Bus();
+                newBus.setBusId(vehId);
+                newBus.setDepartAt(roundMinute10(now));
+                newBus.setCreateAt(now);
+
+                join(newBus);
+
+            }
+        }
+
     }
 
     private LocalDateTime roundMinute10(LocalDateTime time) {
@@ -194,26 +189,29 @@ public class BusService {
         return madeTime;
     }
 
-    public List<Bus> findBus() {
+
+    // 아래에 있는것들은 테스트 용도
+    public List<Bus> findAll() {
         return busRepository.findAll();
     }
 
-    public List<Bus> todayBuses() {
+    public void insertNow() {
+        Bus newBus = new Bus();
         ZonedDateTime nowSeoul = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime now = nowSeoul.toLocalDateTime();
+        LocalDateTime depart = roundMinute10(now);
 
-        LocalDateTime startDatetime = LocalDateTime.of(nowSeoul.toLocalDate(), LocalTime.of(0, 0, 0));
-        LocalDateTime endDatetime = LocalDateTime.of(nowSeoul.toLocalDate(), LocalTime.of(23, 59, 59));
+        newBus.setBusId(1234);
+        newBus.setDepartAt(depart);
+        newBus.setCreateAt(now);
 
-        return busRepository.findAllByDepartAtBetween(startDatetime, endDatetime);
-    }
-
-
-    public Optional<Bus> findOne(Long id) {
-        return busRepository.findById(id);
+        busRepository.save(newBus);
     }
 }
 
-/** aws 실행하는법 **/
+/**
+ * aws 실행하는법
+ */
 
 // cd /Users/oyuchan/when_bus_key
 // $ ssh -i when-bus.pem ubuntu@3.36.184.88
@@ -238,7 +236,7 @@ public class BusService {
 // $ cat nohup.out
 
 
-/** SQL **/
+/** SQL */
 
 // INSERT INTO BUS VALUES(3, '2023-02-21 00:36:56.442737', 1234);
 

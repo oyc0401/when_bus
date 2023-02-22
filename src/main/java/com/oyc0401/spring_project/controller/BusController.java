@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -22,53 +23,51 @@ public class BusController {
         this.busService = busService;
     }
 
-
-    @GetMapping("/all_bus")
+    @GetMapping("/history")
     @ResponseBody
-    public List<Bus> getList() {
-        List<Bus> buses = busService.findBus();
-
+    public List<Bus> getBusHistory(@RequestParam("date") String date) {
+        List<Bus> buses = busService.getHistory(date);
         return buses;
     }
 
-    @GetMapping("/today_bus")
-    @ResponseBody
-    public List<Bus> getToday() {
-        List<Bus> buses = busService.todayBuses();
-
-        return buses;
-    }
-
-    @PostMapping("/bus")
-    @ResponseBody
-    public String insert() {
-        busService.insertNow();
-        return "추가했습니다.";
-    }
-
-
-    @PostMapping("/bus/api/start")
+    @PostMapping("/api/start")
     @ResponseBody
     public String start() {
-        busService.repeat();
+        busService.startRepeat();
         return "시작합니다.";
     }
 
-    @PostMapping("/bus/api/stop")
+    @PostMapping("/api/stop")
     @ResponseBody
     public String stop() {
-        busService.stop();
+        busService.stopRepeat();
         return "정지했습니다.";
     }
 
 
-    @GetMapping("/bus/api/working")
+    @GetMapping("/api/working")
     @ResponseBody
     public boolean isWorking() {
-        boolean working = busService.working();
+        boolean working = busService.isWorking();
         return working;
     }
 
+
+    // 테스트 용도
+    @GetMapping("/test/allBus")
+    @ResponseBody
+    public List<Bus> getList() {
+        List<Bus> buses = busService.findAll();
+
+        return buses;
+    }
+
+//    @PostMapping("/test/insert")
+//    @ResponseBody
+//    public String insert() {
+//        busService.insertNow();
+//        return "추가했습니다.";
+//    }
 
 
 }

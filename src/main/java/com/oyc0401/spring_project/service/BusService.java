@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -23,7 +24,7 @@ public class BusService {
 
     private final BusRepository busRepository;
 
-    private ExecutorService executorService = Executors.newCachedThreadPool();
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private boolean doing = false;
 
@@ -53,9 +54,19 @@ public class BusService {
 
     public void stop() {
         doing = false;
+
+        try {
+            executorService.shutdown();
+//            System.out.printf("쓰레드 종료 1");
+            executorService.awaitTermination(20, TimeUnit.SECONDS);
+//            System.out.printf("쓰레드 종료 2");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean working() {
+
         return doing;
     }
 
@@ -115,20 +126,19 @@ public class BusService {
                 JSONObject object = array.getJSONObject(0);
 
                 final String msg1 = object.getString("arrmsg1");
-                final String serverTime = object.getString("mkTm");
                 final int vehId = object.getInt("vehId1");
 
-                System.out.printf("bus(message: "+msg1+", time: "+serverTime+ ")\n");
-
+                final LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
+                System.out.printf("bus(message: " + msg1 + ", time: " + now.format(formatter) + ")\n");
                 if (!msg1.equals("출발대기") && !msg1.equals("운행종료")) {
 
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-                    final LocalDateTime serverNow = LocalDateTime.parse(serverTime, formatter);
+                    System.out.printf("새로운 버스가 출발했습니다!\n");
 
                     Bus newBus = new Bus();
                     newBus.setBusId(vehId);
-                    newBus.setDepartAt(roundMinute10(serverNow));
-                    newBus.setCreateAt(serverNow);
+                    newBus.setDepartAt(roundMinute10(now));
+                    newBus.setCreateAt(now);
 
                     join(newBus);
 
@@ -146,7 +156,7 @@ public class BusService {
         Optional<Bus> b = busRepository.findFirstByOrderByIdDesc();
         b.ifPresent(m -> {
             if (m.getBusId() == bus.getBusId()) {
-                throw new IllegalStateException("최근에 추가한 버스입니다.");
+//                throw new IllegalStateException("최근에 추가한 버스입니다.");
             }
         });
 
@@ -154,7 +164,8 @@ public class BusService {
 
     public void insertNow() {
         Bus newBus = new Bus();
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime nowSeoul = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime now = nowSeoul.toLocalDateTime();
         LocalDateTime depart = roundMinute10(now);
 
         newBus.setBusId(1234);
@@ -187,9 +198,10 @@ public class BusService {
     }
 
     public List<Bus> todayBuses() {
+        ZonedDateTime nowSeoul = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        LocalDateTime startDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0));
-        LocalDateTime endDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
+        LocalDateTime startDatetime = LocalDateTime.of(nowSeoul.toLocalDate(), LocalTime.of(0, 0, 0));
+        LocalDateTime endDatetime = LocalDateTime.of(nowSeoul.toLocalDate(), LocalTime.of(23, 59, 59));
 
         return busRepository.findAllByDepartAtBetween(startDatetime, endDatetime);
     }

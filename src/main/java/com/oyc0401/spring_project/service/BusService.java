@@ -44,6 +44,7 @@ public class BusService {
         try {
             validate(bus);
             busRepository.save(bus);
+            System.out.printf("새로운 버스가 출발했습니다!\n");
         } catch (IllegalStateException e) {
             System.out.println(e.getMessage());
         }
@@ -133,7 +134,7 @@ public class BusService {
                 System.out.printf("bus(message: " + msg1 + ", time: " + now.format(formatter) + ")\n");
                 if (!msg1.equals("출발대기") && !msg1.equals("운행종료")) {
 
-                    System.out.printf("새로운 버스가 출발했습니다!\n");
+
 
                     Bus newBus = new Bus();
                     newBus.setBusId(vehId);
@@ -156,7 +157,7 @@ public class BusService {
         Optional<Bus> b = busRepository.findFirstByOrderByIdDesc();
         b.ifPresent(m -> {
             if (m.getBusId() == bus.getBusId()) {
-//                throw new IllegalStateException("최근에 추가한 버스입니다.");
+                throw new IllegalStateException("최근에 추가한 버스입니다.");
             }
         });
 
@@ -212,7 +213,32 @@ public class BusService {
     }
 }
 
-//ssh -i when\ bus.pem ubuntu@3.36.184.88
+/** aws 실행하는법 **/
+
+// cd /Users/oyuchan/when_bus_key
+// $ ssh -i when-bus.pem ubuntu@3.36.184.88
+
+// $ cd spring_study
+// $ git pull
+
+// $ sudo chmod +x gradlew
+// $ ./gradlew clean build -x test
+
+// $ java -jar ./build/libs/spring_project-0.0.1-SNAPSHOT.jar &
+
+// $ nohup java -jar ./build/libs/spring_project-0.0.1-SNAPSHOT.jar &
+
+// 현재 실행되는 jar
+// $ ps -ef | grep jar
+
+// 중지
+// $ kill -9 7483
+
+// 최근에 실행한 nohup 들
+// $ cat nohup.out
+
+
+/** SQL **/
 
 // INSERT INTO BUS VALUES(3, '2023-02-21 00:36:56.442737', 1234);
 

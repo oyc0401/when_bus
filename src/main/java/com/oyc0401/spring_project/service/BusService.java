@@ -234,7 +234,7 @@ public class BusService {
 // 중지
 // $ kill -9 7483
 
-// 최근에 실행한 nohup 들
+// 최근에 실행한 nohup 로그
 // $ cat nohup.out
 
 

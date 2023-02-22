@@ -34,9 +34,9 @@ public class BusService {
         return doing;
     }
 
-    public void stopRepeat() {
+    public String stopRepeat() {
         if(!doing){
-            return;
+            return "이미 작동 중지 되었습니다.";
         }
         doing = false;
 
@@ -45,14 +45,15 @@ public class BusService {
 //            System.out.printf("쓰레드 종료 1");
             executorService.awaitTermination(20, TimeUnit.SECONDS);
 //            System.out.printf("쓰레드 종료 2");
+            return "작동 중지 했습니다.";
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void startRepeat() {
+    public String startRepeat() {
         if (doing) {
-            return;
+            return "이미 작동중 입니다.";
 //            throw new IllegalStateException("이미 작동중 입니다.");
         }
         doing = true;
@@ -87,7 +88,7 @@ public class BusService {
             }
             System.out.printf("작업 종료\n");
         });
-
+        return "작동 시작했습니다.";
     }
 
 

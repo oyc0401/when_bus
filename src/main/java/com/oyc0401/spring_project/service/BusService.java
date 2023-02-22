@@ -1,5 +1,6 @@
 package com.oyc0401.spring_project.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oyc0401.spring_project.domain.Bus;
 import com.oyc0401.spring_project.repository.BusRepository;
 import org.json.JSONArray;
@@ -10,13 +11,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -107,37 +104,36 @@ public class BusService {
 
         try {
             URI uri = new URI(urlString);
-
             String response = WebClient.create().get().uri(uri).retrieve().bodyToMono(String.class).block();
             JSONObject rjson = new JSONObject(response);
-            System.out.printf(rjson.toString() + '\n');
+//            System.out.printf(rjson.toString() + '\n');
 
             JSONObject body = rjson.getJSONObject("msgBody");
-
             JSONArray array = body.getJSONArray("itemList");
-
 
             if (!array.isEmpty()) {
                 JSONObject object = array.getJSONObject(0);
-                String msg1 = object.getString("arrmsg1");
-                int vehId = object.getInt("vehId1");
 
+                final String msg1 = object.getString("arrmsg1");
+                final String serverTime = object.getString("mkTm");
+                final int vehId = object.getInt("vehId1");
+
+                System.out.printf("bus(message: "+msg1+", time: "+serverTime+ ")\n");
 
                 if (!msg1.equals("출발대기") && !msg1.equals("운행종료")) {
-                    Bus newBus = new Bus();
-                    LocalDateTime now = LocalDateTime.now();
-                    LocalDateTime depart = roundMinute10(now);
 
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+                    final LocalDateTime serverNow = LocalDateTime.parse(serverTime, formatter);
+
+                    Bus newBus = new Bus();
                     newBus.setBusId(vehId);
-                    newBus.setDepartAt(depart);
-                    newBus.setCreateAt(now);
+                    newBus.setDepartAt(roundMinute10(serverNow));
+                    newBus.setCreateAt(serverNow);
 
                     join(newBus);
 
                 }
-
             }
-
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -203,6 +199,8 @@ public class BusService {
         return busRepository.findById(id);
     }
 }
+
+//ssh -i when\ bus.pem ubuntu@3.36.184.88
 
 // INSERT INTO BUS VALUES(3, '2023-02-21 00:36:56.442737', 1234);
 

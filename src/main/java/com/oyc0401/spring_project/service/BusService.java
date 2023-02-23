@@ -64,7 +64,7 @@ public class BusService {
             System.out.printf("작업 시작\n");
             while (doing) {
                 try {
-                    LocalDateTime now = LocalDateTime.now();
+                    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
                     int hour = now.getHour();
 
                     // 0시 ~ 3시면 작동 중지

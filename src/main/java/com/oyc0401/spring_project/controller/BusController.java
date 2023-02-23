@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -60,11 +61,38 @@ public class BusController {
     @GetMapping("/test/insert")
     @ResponseBody
     public MessageDto insert(@RequestParam("busId") int busId,
-                              @RequestParam("departAt") String departAt,
-                              @RequestParam("createAt") String createAt) {
-        return new MessageDto(busService.insert(busId,departAt,createAt));
+                             @RequestParam("departAt") String departAt,
+                             @RequestParam("createAt") String createAt,
+                             @RequestParam("message") String message,
+                             @RequestParam("busNum") String busNum,
+                             @RequestParam("isLast") boolean isLast) {
+        return new MessageDto(busService.insert(busId, departAt, createAt,message,busNum,isLast));
 
     }
+
+
+//    @GetMapping("/test/update")
+//    @ResponseBody
+//    public void update() {
+////        busService.updateIntervalAll();
+//
+//        List<Bus> list = busService.findAll();
+//
+//        for (int i = 1; i < list.size(); i++) {
+//            Bus late = list.get(i - 1);
+//            Bus now = list.get(i);
+//
+//            Duration duration = Duration.between(late.getDepartAt(), now.getDepartAt());
+//
+//            System.out.printf(duration.toMinutes() + " <<이거\n");
+//            long minutes = duration.toMinutes();
+//
+//            busService.updateInterval(now.getId(), (int) minutes);
+//
+//        }
+//
+//
+//    }
 
 
 

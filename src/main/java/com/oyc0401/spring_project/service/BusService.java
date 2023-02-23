@@ -2,6 +2,7 @@ package com.oyc0401.spring_project.service;
 
 import com.oyc0401.spring_project.domain.Bus;
 import com.oyc0401.spring_project.repository.BusRepository;
+import jakarta.transaction.Transactional;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class BusService {
     }
 
     public String stopRepeat() {
-        if(!doing){
+        if (!doing) {
             return "이미 작동 중지 되었습니다.";
         }
         doing = false;
@@ -84,11 +85,11 @@ public class BusService {
 
 
                 } catch (InterruptedException e) {
-                    doing=false;
+                    doing = false;
                     System.out.printf(e.getMessage());
                     throw new RuntimeException(e);
                 } catch (URISyntaxException e) {
-                    doing=false;
+                    doing = false;
                     System.out.printf(e.getMessage());
                     throw new RuntimeException(e);
                 }
@@ -142,9 +143,9 @@ public class BusService {
         // String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=163000168&busRouteId=165000154&ord=2";
 
 
-            URI uri = new URI(urlString);
-            String response = WebClient.create().get().uri(uri).retrieve().bodyToMono(String.class).block();
-            return new JSONObject(response);
+        URI uri = new URI(urlString);
+        String response = WebClient.create().get().uri(uri).retrieve().bodyToMono(String.class).block();
+        return new JSONObject(response);
 
 
     }
@@ -157,25 +158,40 @@ public class BusService {
         if (!array.isEmpty()) {
             JSONObject object = array.getJSONObject(0);
 
-            final String msg1 = object.getString("arrmsg1");
+            final String message = object.getString("arrmsg1");
             final int vehId = object.getInt("vehId1");
-
+            final String busNum = object.getString("plainNo1");
+            final boolean isLast = object.getInt("isLast1") == 1;
             final LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
+
+
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
-            System.out.printf("bus(message: " + msg1 + ", time: " + now.format(formatter) + ")\n");
-            if (!msg1.equals("출발대기") && !msg1.equals("운행종료")) {
+            System.out.printf("bus(message: " + message + ", time: " + now.format(formatter) + ")\n");
 
-                Bus newBus = new Bus();
-                newBus.setBusId(vehId);
-                newBus.setDepartAt(roundMinute10(now));
-                newBus.setCreateAt(now);
 
-                join(newBus);
+            Bus newBus = new Bus();
+            newBus.setBusId(vehId);
+            newBus.setDepartAt(roundMinute10(now));
+            newBus.setCreateAt(now);
+            newBus.setMessage(message);
+            newBus.setBusNum(busNum);
+            newBus.setIsLast(isLast);
 
-            }
+            Optional<Bus> lastBus = busRepository.findFirstByOrderByIdDesc();
+            lastBus.ifPresent(b -> {
+                Duration duration = Duration.between(b.getDepartAt(), newBus.getDepartAt());
+
+//                System.out.printf(duration.toString());
+                long minutes = duration.toMinutes();
+                newBus.setBusInterval((int) minutes);
+
+            });
+
+            join(newBus);
+
         }
-
     }
+
 
     private LocalDateTime roundMinute10(LocalDateTime time) {
 
@@ -198,43 +214,49 @@ public class BusService {
 
     // 아래에 있는것들은 테스트 용도
 
-    public String insert(int busId, String departAt, String createAt){
+    public String insert(int busId, String departAt, String createAt, String message, String busNum, boolean isLast) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-        LocalDateTime depart=LocalDateTime.parse(departAt,formatter );
-        LocalDateTime create=LocalDateTime.parse(createAt,formatter );
+        LocalDateTime depart = LocalDateTime.parse(departAt, formatter);
+        LocalDateTime create = LocalDateTime.parse(createAt, formatter);
 
         Bus newBus = new Bus();
         newBus.setBusId(busId);
         newBus.setDepartAt(depart);
         newBus.setCreateAt(create);
+        newBus.setMessage(message);
+        newBus.setBusNum(busNum);
+        newBus.setIsLast(isLast);
 
         busRepository.save(newBus);
 
         return "버스를 추가했습니다,";
     }
+
     public List<Bus> findAll() {
         return busRepository.findAll();
     }
 
-    public void insertNow() {
-        Bus newBus = new Bus();
-        ZonedDateTime nowSeoul = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-        LocalDateTime now = nowSeoul.toLocalDateTime();
-        LocalDateTime depart = roundMinute10(now);
-
-        newBus.setBusId(1234);
-        newBus.setDepartAt(depart);
-        newBus.setCreateAt(now);
-
-        busRepository.save(newBus);
 
 
-    }
+//    @Transactional
+//    public void updateInterval(Long id, int inter) {
+//        Optional<Bus> bus = busRepository.findById(id);
+//        bus.get().setBusInterval(inter);
+//
+//    }
+
+
 }
 
 /**
  * aws 실행하는법
+ * SQL
+ * SQL
+ * SQL
+ * SQL
+ * SQL
+ * SQL
  */
 
 // $ cd /Users/oyuchan/when_bus_key
@@ -275,3 +297,5 @@ public class BusService {
 //    create_at datetime2,
 //    primary key (id)
 //);
+
+// curl --location --request GET 'http://localhost:8080/test/update'

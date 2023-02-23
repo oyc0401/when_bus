@@ -15,5 +15,7 @@ public interface BusRepository {
     Optional<Bus> findFirstByOrderByIdDesc();
     List<Bus> findAllByDepartAtBetween(LocalDateTime start, LocalDateTime end);
 
+//    void update(int id, int busInterval);
+
 
 }

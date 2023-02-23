@@ -84,6 +84,11 @@ public class BusService {
 
 
                 } catch (InterruptedException e) {
+                    doing=false;
+                    System.out.printf(e.getMessage());
+                    throw new RuntimeException(e);
+                } catch (URISyntaxException e) {
+                    doing=false;
                     System.out.printf(e.getMessage());
                     throw new RuntimeException(e);
                 }
@@ -129,21 +134,18 @@ public class BusService {
 
     }
 
-    private JSONObject request1601() {
+    private JSONObject request1601() throws URISyntaxException {
         // 부천 시청역
         String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=210000166&busRouteId=165000154&ord=16&resultType=json";
 
         // 정석 항공고
         // String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=163000168&busRouteId=165000154&ord=2";
 
-        try {
+
             URI uri = new URI(urlString);
             String response = WebClient.create().get().uri(uri).retrieve().bodyToMono(String.class).block();
             return new JSONObject(response);
-        } catch (URISyntaxException e) {
-            System.out.printf(e.getMessage());
-            throw new RuntimeException(e);
-        }
+
 
     }
 

@@ -56,4 +56,17 @@ public class BusController {
 
     }
 
+    // 테스트 용도
+    @GetMapping("/test/insert")
+    @ResponseBody
+    public MessageDto insert(@RequestParam("busId") int busId,
+                              @RequestParam("departAt") String departAt,
+                              @RequestParam("createAt") String createAt) {
+        return new MessageDto(busService.insert(busId,departAt,createAt));
+
+    }
+
+
+
+
 }

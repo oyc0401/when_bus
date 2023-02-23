@@ -47,6 +47,7 @@ public class BusService {
 //            System.out.printf("쓰레드 종료 2");
             return "작동 중지 했습니다.";
         } catch (InterruptedException e) {
+            System.out.printf(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -83,6 +84,7 @@ public class BusService {
 
 
                 } catch (InterruptedException e) {
+                    System.out.printf(e.getMessage());
                     throw new RuntimeException(e);
                 }
             }
@@ -139,6 +141,7 @@ public class BusService {
             String response = WebClient.create().get().uri(uri).retrieve().bodyToMono(String.class).block();
             return new JSONObject(response);
         } catch (URISyntaxException e) {
+            System.out.printf(e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -192,6 +195,22 @@ public class BusService {
 
 
     // 아래에 있는것들은 테스트 용도
+
+    public String insert(int busId, String departAt, String createAt){
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        LocalDateTime depart=LocalDateTime.parse(departAt,formatter );
+        LocalDateTime create=LocalDateTime.parse(createAt,formatter );
+
+        Bus newBus = new Bus();
+        newBus.setBusId(busId);
+        newBus.setDepartAt(depart);
+        newBus.setCreateAt(create);
+
+        busRepository.save(newBus);
+
+        return "버스를 추가했습니다,";
+    }
     public List<Bus> findAll() {
         return busRepository.findAll();
     }
@@ -207,6 +226,8 @@ public class BusService {
         newBus.setCreateAt(now);
 
         busRepository.save(newBus);
+
+
     }
 }
 

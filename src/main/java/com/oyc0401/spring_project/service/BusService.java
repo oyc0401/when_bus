@@ -137,7 +137,13 @@ public class BusService {
 
     private JSONObject request1601() throws URISyntaxException {
         // 부천 시청역
-        String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=210000166&busRouteId=165000154&ord=16&resultType=json";
+        // String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=210000166&busRouteId=165000154&ord=16&resultType=json";
+
+
+        // 인천 시철 후문
+        String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=165000290&busRouteId=165000154&ord=8&resultType=json";
+
+
 
         // 정석 항공고
         // String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=163000168&busRouteId=165000154&ord=2";
@@ -169,25 +175,31 @@ public class BusService {
             System.out.printf("bus(message: " + message + ", time: " + now.format(formatter) + ")\n");
 
 
-            Bus newBus = new Bus();
-            newBus.setBusId(vehId);
-            newBus.setDepartAt(roundMinute10(now));
-            newBus.setCreateAt(now);
-            newBus.setMessage(message);
-            newBus.setBusNum(busNum);
-            newBus.setIsLast(isLast);
+            if (!message.equals("출발대기") && !message.equals("운행종료")) {
 
-            Optional<Bus> lastBus = busRepository.findFirstByOrderByIdDesc();
-            lastBus.ifPresent(b -> {
-                Duration duration = Duration.between(b.getDepartAt(), newBus.getDepartAt());
+                Bus newBus = new Bus();
+                newBus.setBusId(vehId);
+                newBus.setDepartAt(roundMinute10(now));
+                newBus.setCreateAt(now);
+                newBus.setMessage(message);
+                newBus.setBusNum(busNum);
+                newBus.setIsLast(isLast);
+
+                Optional<Bus> lastBus = busRepository.findFirstByOrderByIdDesc();
+                lastBus.ifPresent(b -> {
+                    Duration duration = Duration.between(b.getDepartAt(), newBus.getDepartAt());
 
 //                System.out.printf(duration.toString());
-                long minutes = duration.toMinutes();
-                newBus.setBusInterval((int) minutes);
+                    long minutes = duration.toMinutes();
+                    newBus.setBusInterval((int) minutes);
 
-            });
+                });
 
-            join(newBus);
+                join(newBus);
+
+
+            }
+
 
         }
     }
@@ -297,5 +309,7 @@ public class BusService {
 //    create_at datetime2,
 //    primary key (id)
 //);
+
+// $ curl --location --request POST 'http://localhost:8080/api/start'
 
 // curl --location --request GET 'http://localhost:8080/test/update'

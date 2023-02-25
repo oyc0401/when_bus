@@ -6,10 +6,8 @@ import com.oyc0401.spring_project.dto.MessageDto;
 import com.oyc0401.spring_project.service.BusService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -27,6 +25,12 @@ public class BusController {
     public MessageDto getBusHistory(@RequestParam("date") String date) {
         List<Bus> buses = busService.getHistory(date);
         return new MessageDto(buses);
+    }
+
+    @GetMapping("/availableTimes")
+    @ResponseBody
+    public MessageDto getAvailableTime() {
+        return new MessageDto(busService.availableTimes());
     }
 
     @PostMapping("/api/start")
@@ -47,6 +51,8 @@ public class BusController {
     public MessageDto isWorking() {
         return new MessageDto(busService.isWorking());
     }
+
+
 
 
     // 테스트 용도

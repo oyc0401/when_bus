@@ -2,7 +2,6 @@ package com.oyc0401.spring_project.service;
 
 import com.oyc0401.spring_project.domain.Bus;
 import com.oyc0401.spring_project.repository.BusRepository;
-import jakarta.transaction.Transactional;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,7 +143,6 @@ public class BusService {
         String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=165000290&busRouteId=165000154&ord=8&resultType=json";
 
 
-
         // 정석 항공고
         // String urlString = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRoute?serviceKey=%2FCX1Je8srsa%2BN1XFaGPVbiGNqbqECXBdN5MYLSf682mak8Po3%2BewTQAuuqybgT6HGAbdv3RLl0%2FqMi32J%2BPbvg%3D%3D&stId=163000168&busRouteId=165000154&ord=2";
 
@@ -249,6 +247,36 @@ public class BusService {
         return busRepository.findAll();
     }
 
+    public List<String> availableTimes() {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        LocalDate startTime = LocalDate.parse("20230222", formatter);
+        final LocalDate now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDate();
+
+
+        String startDate = startTime.format(formatter);
+        final LocalDate endPlusOne=now.plusDays(1);
+        String endDatePlusOne = endPlusOne.format(formatter);
+
+
+//        System.out.printf(startDate+'\n'+endDatePlusOne+'\n');
+
+        List<String> list = new ArrayList<>();
+
+
+
+
+        while (!startDate.equals(endDatePlusOne)) { //다르다면 실행, 동일 하다면 빠져나감
+//            System.out.printf(startDate+", "+ endDatePlusOne+"\n");
+            list.add(startDate);
+
+            startTime= startTime.plusDays(1); // 하루 더해줌
+            startDate = startTime.format(formatter); // 비교를 위한 값 셋팅
+        }
+        return list;
+
+    }
 
 
 //    @Transactional
@@ -263,6 +291,11 @@ public class BusService {
 
 /**
  * aws 실행하는법
+ * SQL
+ * SQL
+ * SQL
+ * SQL
+ * SQL
  * SQL
  * SQL
  * SQL

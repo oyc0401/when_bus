@@ -18,6 +18,7 @@ public class Bus {
     private int busInterval;
     private String busNum;
     private String message;
+    private boolean isFirst;
     private boolean isLast;
 
     public int getBusInterval() {
@@ -43,6 +44,14 @@ public class Bus {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public boolean getIsFirst() {
+        return isFirst;
+    }
+
+    public void setIsFirst(boolean isFirst) {
+        this.isFirst = isFirst;
     }
 
     public boolean getIsLast() {

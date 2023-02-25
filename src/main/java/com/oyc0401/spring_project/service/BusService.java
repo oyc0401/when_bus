@@ -165,8 +165,14 @@ public class BusService {
             final String message = object.getString("arrmsg1");
             final int vehId = object.getInt("vehId1");
             final String busNum = object.getString("plainNo1");
-            final boolean isLast = object.getInt("isLast1") == 1;
+
             final LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
+
+
+            final boolean isFirst = now.getHour() < 5;
+            final boolean isLast = now.getHour() == 23;
+
+
 
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
@@ -181,6 +187,7 @@ public class BusService {
                 newBus.setCreateAt(now);
                 newBus.setMessage(message);
                 newBus.setBusNum(busNum);
+                newBus.setIsFirst(isFirst);
                 newBus.setIsLast(isLast);
 
                 Optional<Bus> lastBus = busRepository.findFirstByOrderByIdDesc();
@@ -256,7 +263,7 @@ public class BusService {
 
 
         String startDate = startTime.format(formatter);
-        final LocalDate endPlusOne=now.plusDays(1);
+        final LocalDate endPlusOne = now.plusDays(1);
         String endDatePlusOne = endPlusOne.format(formatter);
 
 
@@ -265,13 +272,11 @@ public class BusService {
         List<String> list = new ArrayList<>();
 
 
-
-
         while (!startDate.equals(endDatePlusOne)) { //다르다면 실행, 동일 하다면 빠져나감
 //            System.out.printf(startDate+", "+ endDatePlusOne+"\n");
             list.add(startDate);
 
-            startTime= startTime.plusDays(1); // 하루 더해줌
+            startTime = startTime.plusDays(1); // 하루 더해줌
             startDate = startTime.format(formatter); // 비교를 위한 값 셋팅
         }
         return list;
@@ -291,6 +296,9 @@ public class BusService {
 
 /**
  * aws 실행하는법
+ * SQL
+ * SQL
+ * SQL
  * SQL
  * SQL
  * SQL

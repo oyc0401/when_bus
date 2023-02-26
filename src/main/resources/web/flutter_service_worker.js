@@ -4,9 +4,10 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
   "version.json": "283f6179e465f34c0100f4a32dd203e9",
-"index.html": "e99a1fffcd9bc497c782c04aeef2069a",
-"/": "e99a1fffcd9bc497c782c04aeef2069a",
+"index.html": "20c672931954395147ee5e385379ad0e",
+"/": "20c672931954395147ee5e385379ad0e",
 "main.dart.js": "c604fd08807adcbfa21111a3e2ef26e6",
+"flutter.js": "1cfe996e845b3a8a33f57607e8b09ee4",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
@@ -21,7 +22,11 @@ const RESOURCES = {
 "assets/fonts/Noto_Sans_KR/NotoSansKR-Regular.otf": "210989664066c01d8ffdbdf56bb773cd",
 "assets/fonts/Roboto/Roboto-Regular.ttf": "8a36205bd9b83e03af0591a004bc97f4",
 "assets/fonts/Roboto/Roboto-Bold.ttf": "b8e42971dec8d49207a8c8e2b919a6ac",
-"assets/fonts/MaterialIcons-Regular.otf": "6389a7e1b13dc7f337f519b427525539"
+"assets/fonts/MaterialIcons-Regular.otf": "6389a7e1b13dc7f337f519b427525539",
+"canvaskit/canvaskit.js": "97937cb4c2c2073c968525a3e08c86a3",
+"canvaskit/profiling/canvaskit.js": "c21852696bc1cc82e8894d851c01921a",
+"canvaskit/profiling/canvaskit.wasm": "371bc4e204443b0d5e774d64a046eb99",
+"canvaskit/canvaskit.wasm": "3de12d898ec208a5f31362cc00f09b9e"
 };
 
 // The application shell files that are downloaded before a service worker can

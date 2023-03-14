@@ -127,7 +127,7 @@ public class BusService {
 
         Optional<Bus> b = busRepository.findFirstByOrderByIdDesc();
         b.ifPresent(m -> {
-            if (m.getBusId() == bus.getBusId()) {
+            if (m.getBusId() == bus.getBusId() && m.getCreateAt().getDayOfYear() == bus.getCreateAt().getDayOfYear()) {
                 throw new IllegalStateException("최근에 추가한 버스입니다.");
             }
         });
@@ -171,8 +171,6 @@ public class BusService {
 
             final boolean isFirst = now.getHour() < 5;
             final boolean isLast = now.getHour() == 23;
-
-
 
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
@@ -296,6 +294,7 @@ public class BusService {
 
 /**
  * aws 실행하는법
+ * SQL
  * SQL
  * SQL
  * SQL
